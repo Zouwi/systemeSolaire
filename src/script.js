@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import {GLTFLoader} from "three/examples/jsm/loaders/GLTFLoader.js";
 
 /**
  * Base
@@ -21,6 +22,28 @@ const scene = new THREE.Scene()
  */
 const textureLoader = new THREE.TextureLoader();
 
+/** Instancier le modelLoader**/
+const modelLoader = new GLTFLoader();
+
+//ajout d'une fusée
+let rocket;
+modelLoader.load('model/rocket.glb', function (gltf) {
+        rocket = gltf.scene;  // Assurez-vous que tv est une variable accessible à un niveau supérieur
+        rocket.scale.set(1, 1, 1);
+        rocket.position.z = 0;
+        rocket.position.x = 20;
+        rocket.position.y = 0;
+        rocket.rotation.y = -0.9;
+        rocket.traverse(function (node) {
+            if (node.isMesh) {
+                node.castShadow = true;
+            }
+        })
+        scene.add(rocket);
+    },
+    undefined, function (error) {
+        console.error(error);
+    });
 
 /**
  * Objects
@@ -162,8 +185,6 @@ const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 
 camera.position.z = 30
 scene.add(camera)
 
-
-
 // Controls
 const controls = new OrbitControls(camera, canvas)
 controls.enableDamping = true
@@ -218,6 +239,11 @@ const tick = () => {
 
     neptune.position.x = Math.cos(elapsedTime * 0.03) * 75;
     neptune.position.z = Math.sin(elapsedTime * 0.03) * 75;
+
+    //animation de la fusée de haut en bas
+    if (rocket) {
+        rocket.position.y = Math.sin(elapsedTime) * 5;
+    }
 
     renderer.render(scene, camera);
 
